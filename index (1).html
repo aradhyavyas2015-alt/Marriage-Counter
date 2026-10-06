@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wedding Planner</title>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg"><meta name="theme-color" content="#7a1f3d">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<style>
+:root{--bg:#faf6ef;--card:#fff;--ink:#2b2523;--mute:#7b706a;--wine:#7a1f3d;--wine2:#5e1630;--gold:#b8975a;--sand:#f1e8d8;--line:#e8dfd0;--ok:#3d7a4f}
+@media(prefers-color-scheme:dark){:root{--bg:#1d1819;--card:#2a2324;--ink:#f1e9df;--mute:#b3a79d;--wine:#c0587a;--wine2:#a8466a;--sand:#3a3030;--line:#443a3a}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font:15px/1.5 Georgia,'Palatino Linotype',serif;background:var(--bg);color:var(--ink)}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-weight:600;margin:0}h1{font-size:26px}h2{font-size:18px;margin:22px 0 10px}
+#side{position:fixed;inset:0 auto 0 0;width:232px;background:var(--wine2);color:#f6ecdf;padding:20px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto;z-index:20;transition:transform .2s}
+#side .logo{font-size:20px;padding:4px 10px 16px;border-bottom:1px solid #ffffff30;margin-bottom:8px;color:#e6cf9f}
+#side button{background:none;border:0;color:inherit;text-align:left;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:15px}
+#side button:hover{background:#ffffff14}#side button.on{background:#ffffff26;color:#fff;box-shadow:inset 3px 0 var(--gold)}
+#side hr{border:0;border-top:1px solid #ffffff25;margin:8px 0;width:100%}
+#top{display:none;position:sticky;top:0;z-index:10;background:var(--wine2);color:#fff;padding:10px 14px;align-items:center;gap:12px}
+#top button{background:none;border:0;color:#fff;font-size:24px}
+#main{margin-left:232px;padding:28px 32px 90px;max-width:1100px}
+.head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.btn{border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:9px;cursor:pointer}
+.btn:hover{border-color:var(--gold)}.btn.p{background:var(--wine);border-color:var(--wine);color:#fff}.btn.p:hover{background:var(--wine2)}
+.btn.d{color:#b3322f}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.bar input,.bar select,.modal input,.modal textarea{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 12px}
+.bar input[type=search]{flex:1;min-width:180px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 10px #5e163010;overflow:auto}
+table{width:100%;border-collapse:collapse}th{text-align:left;font-weight:600;font-size:13px;color:var(--mute);padding:10px 14px;background:var(--sand);position:sticky;top:0}
+td{padding:9px 14px;border-top:1px solid var(--line);vertical-align:middle}tr.off td:not(:first-child):not(:last-child){opacity:.45}
+td small{display:block;color:var(--mute);font-size:12px}td.num,th.num{text-align:center;width:150px}
+.st{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
+.st button{border:0;background:var(--sand);width:32px;height:34px;cursor:pointer;font-size:18px}.st button:disabled{opacity:.35}
+.st input{width:52px;text-align:center;border:0;height:34px;background:transparent;-moz-appearance:textfield}
+.st input::-webkit-inner-spin-button{display:none}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--wine)}
+.x{border:0;background:none;color:var(--mute);cursor:pointer;font-size:16px;padding:6px}.x:hover{color:#b3322f}
+.tot{position:sticky;bottom:0;margin-top:12px;background:var(--wine2);color:#fff;border-radius:12px;padding:12px 18px;display:flex;gap:28px;flex-wrap:wrap;box-shadow:0 -4px 14px #0002}
+.tot b{font-size:20px;color:#e6cf9f;margin-left:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:left;cursor:pointer}
+.tile:hover{border-color:var(--gold)}.tile span{display:block;color:var(--mute);font-size:13px}.tile b{font-size:28px;color:var(--wine);font-weight:600}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.tabs button{border:1px solid var(--line);background:var(--card);padding:7px 14px;border-radius:99px;cursor:pointer}
+.tabs button.on{background:var(--wine);color:#fff;border-color:var(--wine)}
+.empty{text-align:center;padding:44px 16px;color:var(--mute)}.empty p{margin:0 0 12px}
+.badge{font-size:11px;background:#e9c46a55;border-radius:6px;padding:1px 6px;margin-left:6px}
+dialog{border:0;border-radius:16px;padding:0;width:min(520px,94vw);background:var(--card);color:var(--ink);box-shadow:0 20px 60px #0005}
+dialog::backdrop{background:#2b252388}.modal{padding:22px;display:grid;gap:10px;max-height:86vh;overflow:auto}.modal label{font-size:13px;color:var(--mute)}
+.modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;z-index:50;display:none;gap:14px;align-items:center}
+#toast button{background:none;border:0;color:var(--gold);cursor:pointer;font-weight:700}
+@media(max-width:800px){#side{transform:translateX(-100%)}#side.open{transform:none}#top{display:flex}#main{margin:0;padding:16px 12px 90px}h1{font-size:22px}td,th{padding:8px 8px}td.num,th.num{width:128px}.st input{width:40px}}
+:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+</style></head><body>
+<nav id="side"></nav>
+<div id="top"><button data-a="menu" aria-label="Menu">☰</button><b>Wedding Planner</b></div>
+<main id="main"></main><dialog id="dlg"></dialog><div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const EV=[['mehndi','Mehndi'],['haldi','Haldi'],['sangeet','Sangeet'],['shaadi','Shaadi'],['reception','Reception']];
+const DAYS=[['20','20 February'],['21','21 February']],ML=[['breakfast','Breakfast'],['lunch','Lunch'],['tea','Hi Tea'],['dinner','Dinner']];
+const NAV=[['dash','Dashboard'],['guests','Guests / Master list'],...EV.map(([i,n])=>['e:'+i,n]),['food','Food planner'],['export','Export']];
+// Data: S.g = guests [{id,name,members,names[],local?}], S.a[key][guestId] = {on,n}; key = 'e:<event>' or 'm:<day>:<meal>'
+let S;try{S=JSON.parse(localStorage.getItem('wedding'))}catch(e){}S=S||{g:[],a:{}};
+let U=[],IM=[],ui={v:'dash',q:'',f:'all',d:1,day:'20',meal:'breakfast'};
+const save=()=>localStorage.setItem('wedding',JSON.stringify(S)),snap=()=>{U.push(JSON.stringify(S));if(U.length>50)U.shift()};
+const uid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36),norm=s=>s.toLowerCase().replace(/\s+/g,' ').trim();
+const ent=(k,id)=>(S.a[k]||{})[id],vis=(k,g)=>!g.local||g.local===k,gOf=id=>S.g.find(x=>x.id==id);
+const key=()=>ui.v=='food'?`m:${ui.day}:${ui.meal}`:ui.v=='guests'?'g':ui.v;
+function tot(k){let f=0,m=0;S.g.forEach(g=>{const e=ent(k,g.id);if(e&&e.on&&vis(k,g)){f++;m+=e.n}});return[f,m]}
+function put(k,id,p){snap();const a=S.a[k]=S.a[k]||{};const e=a[id]=a[id]||{on:false,n:gOf(id).members};Object.assign(e,p);save()}
+function toast(msg,undo){const t=$('#toast');t.innerHTML=esc(msg)+(undo?'<button data-a="undo">Undo</button>':'');t.style.display='flex';clearTimeout(t.h);t.h=setTimeout(()=>t.style.display='none',5000)}
+function title(k){if(k=='g')return'Guests / Master list';if(k[0]=='e')return EV.find(x=>'e:'+x[0]==k)[1];const[,d,m]=k.split(':');return DAYS.find(x=>x[0]==d)[1]+' → '+ML.find(x=>x[0]==m)[1]}
+function render(){$('#side').innerHTML='<div class="logo">Wedding Planner</div>'+NAV.map(([i,n],x)=>(x==2||i=='food'?'<hr>':'')+`<button data-go="${i}" class="${ui.v==i?'on':''}">${n}</button>`).join('');
+ $('#side').classList.remove('open');const v=ui.v,m=$('#main');
+ if(v=='dash')m.innerHTML=dash();else if(v=='export')m.innerHTML=`<div class="head"><h1>Export</h1></div><div class="card" style="padding:24px"><p>Creates one Excel file with 9 sheets: master list, 5 events, 2 food days and a summary.</p><button class="btn p" data-a="export" style="font-size:17px;padding:12px 22px">EXPORT TO EXCEL</button></div>`;
+ else{m.innerHTML=listView();body()}window.scrollTo(0,0)}
+function dash(){const ev=EV.map(([i,n])=>[n,tot('e:'+i)[1],'e:'+i]),ml=[];
+ const days=DAYS.map(([d,dn])=>[dn,ML.map(([m,mn])=>{const r=[`${dn} ${mn}`,tot(`m:${d}:${m}`)[1],d,m];ml.push(r);return[mn,r[1],d,m]})]);
+ const bE=ev.reduce((a,b)=>b[1]>a[1]?b:a,['—',0]),bM=ml.reduce((a,b)=>b[1]>a[1]?b:a,['—',0]);
+ return`<div class="head"><h1>Dashboard</h1><div class="acts"><button class="btn" data-a="undo">Undo</button><button class="btn p" data-a="export">EXPORT TO EXCEL</button></div></div>
+ <div class="grid"><div class="tile"><span>Total families</span><b>${S.g.filter(g=>!g.local).length}</b></div><div class="tile"><span>Total people (master)</span><b>${S.g.filter(g=>!g.local).reduce((s,g)=>s+g.members,0)}</b></div>
+ <div class="tile"><span>Busiest event</span><b style="font-size:20px">${bE[0]}</b><span>${bE[1]} people</span></div><div class="tile"><span>Busiest meal</span><b style="font-size:20px">${bM[0]}</b><span>${bM[1]} people</span></div></div>
+ <h2>Wedding event summary</h2><div class="grid">${ev.map(e=>`<button class="tile" data-go="${e[2]}"><span>${e[0]}</span><b>${e[1]}</b></button>`).join('')}</div>
+ <h2>Food summary</h2>${days.map(([dn,ms])=>`<h3 style="margin:12px 0 8px;color:var(--mute);font-size:15px">${dn}</h3><div class="grid">${ms.map(m=>`<button class="tile" data-a="meal" data-d="${m[2]}" data-m="${m[3]}"><span>${m[0]}</span><b>${m[1]}</b></button>`).join('')}</div>`).join('')}`}
+function listView(){const k=key(),g=k=='g';let h='';
+ if(ui.v=='food')h=`<div class="head"><h1>Food planner</h1></div><div class="tabs">${DAYS.map(([d,n])=>`<button data-a="day" data-d="${d}" class="${ui.day==d?'on':''}">${n}</button>`).join('')}</div><div class="tabs">${ML.map(([m,n])=>`<button data-a="mealtab" data-m="${m}" class="${ui.meal==m?'on':''}">${n}</button>`).join('')}</div>`;
+ else h=`<div class="head"><h1>${title(k)}</h1></div>`;
+ return h+`<div class="bar"><input type="search" id="q" placeholder="Search name…" value="${esc(ui.q)}">${g?'':`<select data-a="filt"><option value="all">Everyone</option><option value="on"${ui.f=='on'?' selected':''}>Attending</option><option value="off"${ui.f=='off'?' selected':''}>Not attending</option></select>`}
+ <button class="btn" data-a="sort">A–Z ${ui.d>0?'↑':'↓'}</button><button class="btn p" data-a="add">+ Add ${g?'family':'family / name'}</button>${g?'<button class="btn" data-a="imp">Import from PDF</button><input type="file" id="pdf" accept="application/pdf" hidden data-a="pdf">':'<button class="btn" data-a="all">Include all</button><button class="btn" data-a="none">Clear all</button>'}<button class="btn" data-a="undo">Undo</button></div>
+ <div class="card"><table><thead><tr>${g?'':'<th></th>'}<th>Family / Name</th><th class="num">${g?'Default members':'Members'}</th><th></th></tr></thead><tbody id="tb"></tbody></table></div><div class="tot" id="tot"></div>`+(ui.v=='food'?'<div id="fs"></div>':'')}
+function foodSum(){return DAYS.map(([d,dn])=>`<h2>${dn} summary</h2><div class="grid">${ML.map(([m,mn])=>`<div class="tile"><span>${mn}</span><b>${tot(`m:${d}:${m}`)[1]}</b></div>`).join('')}</div>`).join('')}
+function body(){const k=key(),g=k=='g',q=norm(ui.q);let L=S.g.filter(x=>(g?!x.local:vis(k,x))&&(!q||norm(x.name+' '+x.names.join(' ')).includes(q)));
+ if(!g&&ui.f!='all')L=L.filter(x=>!!(ent(k,x.id)||{}).on==(ui.f=='on'));
+ L.sort((a,b)=>a.name.localeCompare(b.name)*ui.d);
+ $('#tb').innerHTML=L.length?L.map(x=>{const e=ent(k,x.id),on=g||(e&&e.on),n=g?x.members:(e?e.n:x.members),nm=x.names.length?`<small>${esc(x.names.join(', '))}</small>`:'';
+  return`<tr class="${on?'':'off'}">${g?'':`<td style="width:44px"><input type="checkbox" data-a="tog" data-id="${x.id}" ${on?'checked':''} aria-label="Attending"></td>`}<td>${esc(x.name)}${x.local?'<span class="badge">this list only</span>':''}${nm}</td>
+  <td class="num"><div class="st"><button data-a="dec" data-id="${x.id}" ${on?'':'disabled'}>−</button><input type="number" min="${g?1:0}" data-a="num" data-id="${x.id}" value="${n}" ${on?'':'disabled'}><button data-a="inc" data-id="${x.id}" ${on?'':'disabled'}>+</button></div></td>
+  <td style="white-space:nowrap">${g?`<button class="x" data-a="edit" data-id="${x.id}" title="Edit">✎</button><button class="x" data-a="del" data-id="${x.id}" title="Delete">🗑</button>`:`<button class="x" data-a="rm" data-id="${x.id}" title="Remove from this list">✕</button>`}</td></tr>`}).join('')
+ :`<tr><td colspan="4"><div class="empty"><p>${S.g.length&&q?'No matches.':g?'No guests added yet.':k[0]=='e'?'No guests added yet.':'No guests added to this meal.'}</p>${q?'':'<button class="btn p" data-a="add">+ Add Family</button>'}</div></td></tr>`;
+ const[f,m]=g?[S.g.filter(x=>!x.local).length,S.g.filter(x=>!x.local).reduce((s,x)=>s+x.members,0)]:tot(k);
+ $('#tot').innerHTML=`<span>Total Families<b>${f}</b></span><span>Total ${g?'People':'Members'}<b>${m}</b></span>`;
+ if($('#fs'))$('#fs').innerHTML=foodSum()}
+function modal(h){const d=$('#dlg');d.innerHTML=`<div class="modal">${h}</div>`;d.showModal()}
+function guestModal(id){const k=key(),x=id?gOf(id):{name:'',members:1,names:[]};$('#dlg').dataset.id=id||'';$('#dlg').dataset.k=k;
+ modal(`<h3>${id?'Edit':'Add'} family / name</h3><label>Family or person name</label><input id="gn" value="${esc(x.name)}" autofocus><label>Number of members</label><input id="gm" type="number" min="1" value="${x.members}">
+ <label>Individual names (optional, one per line)</label><textarea id="gl" rows="4">${esc(x.names.join('\n'))}</textarea>
+ ${!id&&k!='g'?`<label><input type="radio" name="sc" value="only" checked> Add to this list only</label><label><input type="radio" name="sc" value="master"> Add to master guest list as well</label>`:''}
+ <div class="row"><button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="saveg">Save</button></div>`)}
+function saveG(){const d=$('#dlg'),id=d.dataset.id,k=d.dataset.k,name=$('#gn').value.trim();let m=Math.max(1,Math.floor(+$('#gm').value)||1);
+ const names=$('#gl').value.split('\n').map(s=>s.trim()).filter(Boolean);if(!name)return alert('Please enter a name.');if(names.length>m)m=names.length;
+ const dup=S.g.find(x=>x.id!=id&&norm(x.name)==norm(name));if(dup&&!confirm(`"${dup.name}" is already in the list. Add anyway?`))return;snap();
+ if(id)Object.assign(gOf(id),{name,members:m,names});else{const g={id:uid(),name,members:m,names};
+  if(k!='g'){if($('input[name=sc]:checked').value=='only')g.local=k;(S.a[k]=S.a[k]||{})[g.id]={on:true,n:m}}S.g.push(g)}
+ save();d.close();render();toast('Saved',1)}
+async function readPdf(f){try{pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+ const d=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,out=[];
+ for(let p=1;p<=d.numPages;p++){const t=await(await d.getPage(p)).getTextContent(),r={};t.items.forEach(i=>{if(i.str.trim())(r[Math.round(i.transform[5]/3)]=r[Math.round(i.transform[5]/3)]||[]).push(i)});
+  Object.keys(r).map(Number).sort((a,b)=>b-a).forEach(y=>out.push(r[y].sort((a,b)=>a.transform[4]-b.transform[4]).map(i=>i.str).join(' ')))}
+ IM=parseGuests(out);
+ if(!IM.length)return alert('No guest rows found. Each line should look like: 1 Name 4 (name, then number of members).');impModal()}catch(e){alert('Could not read this PDF: '+e.message)}}
+// Reads lines like "12 Sharma Family 5" -> name "Sharma Family", members 5. Skips headings, totals and empty serials.
+function parseGuests(lines){const cap=w=>/^[a-z]/.test(w)?w[0].toUpperCase()+w.slice(1):w,out=[];
+ lines.forEach(s=>{s=s.replace(/\s+/g,' ').trim();if(/^(total|s\.?\s?no)/i.test(s))return;
+  const m=s.match(/^(?:\d{1,3}[.)]?\s+)?(.*?[A-Za-z].*?)\s+(\d{1,2})$/);if(!m)return;
+  const t=m[1].split(' ').map(cap).join(' ').replace(/^[\W_]+|[\W_]+$/g,'');if(t.length>1)out.push({t,n:+m[2],on:+m[2]>0})});return out}
+function impModal(){const seen=new Set(S.g.filter(x=>!x.local).map(x=>norm(x.name)));
+ IM.forEach(r=>{const k=norm(r.t);r.dup=seen.has(k);seen.add(k);if(r.dup&&!r.touched)r.on=false});
+ const nOn=IM.filter(r=>r.on).length;
+ modal(`<h3>Review guests from PDF</h3><p style="margin:0;color:var(--mute)">${IM.length} found. Check each name and number of members. Untick anyone you don't want. Duplicates and rows with 0 members start unticked.</p>
+ <div style="max-height:48vh;overflow:auto;display:grid;gap:6px">${IM.map((r,i)=>`<div style="display:flex;gap:8px;align-items:center"><input type="checkbox" data-a="imc" data-i="${i}" ${r.on?'checked':''} aria-label="Import"><input data-a="imt" data-i="${i}" value="${esc(r.t)}" style="flex:1;min-width:0"><input type="number" min="0" data-a="imn" data-i="${i}" value="${r.n}" style="width:62px;text-align:center" aria-label="Members">${r.dup?'<span class="badge">duplicate</span>':r.n==0?'<span class="badge">0 members</span>':''}</div>`).join('')}</div>
+ <div class="row"><button class="btn" data-a="close">Cancel</button><button class="btn p" data-a="doimp">Import ${nOn} selected</button></div>`)}
+function doImport(){const ex=new Set(S.g.filter(x=>!x.local).map(x=>norm(x.name)));let n=0,s=0;snap();
+ IM.forEach(r=>{const t=r.t.trim();if(!r.on||!t)return;if(ex.has(norm(t))&&!confirm(`"${t}" is already in the list. Import it again?`)){s++;return}ex.add(norm(t));S.g.push({id:uid(),name:t,members:Math.max(1,Math.floor(+r.n)||1),names:[]});n++});
+ save();$('#dlg').close();render();toast(`Imported ${n} guest${n==1?'':'s'}${s?`, skipped ${s}`:''}`,1)}
+async function exportXlsx(){const wb=new ExcelJS.Workbook(),gs=[...S.g].sort((a,b)=>a.name.localeCompare(b.name));
+ const mk=(nm,head,rows,tr)=>{const ws=wb.addWorksheet(nm,{views:[{state:'frozen',ySplit:1}]});ws.addRow(head);rows.forEach(r=>ws.addRow(r));
+  if(tr)ws.addRow(tr).eachCell({includeEmpty:true},c=>{c.font={bold:true};c.border={top:{style:'thin'}}});
+  ws.getRow(1).eachCell(c=>{c.font={bold:true,color:{argb:'FFFFFFFF'}};c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF7A1F3D'}}});
+  ws.columns.forEach(c=>{let m=10;c.eachCell(x=>m=Math.max(m,String(x.value??'').length+3));c.width=Math.min(m,50)});return ws};
+ const M=gs.filter(g=>!g.local);mk('Master Guest List',['Family Name','Default Member Count','Individual Names'],M.map(g=>[g.name,g.members,g.names.join(', ')]),[`TOTAL (${M.length} families)`,M.reduce((s,g)=>s+g.members,0),'']);
+ EV.forEach(([i,n])=>{const k='e:'+i,r=gs.filter(g=>vis(k,g)&&(ent(k,g.id)||{}).on).map(g=>[g.name,ent(k,g.id).n]),t=tot(k);mk(n,['Family Name','Member Count'],r,[`TOTAL (${t[0]} families)`,t[1]])});
+ DAYS.forEach(([d,dn])=>{const r=gs.filter(g=>ML.some(([m])=>(ent(`m:${d}:${m}`,g.id)||{}).on)).map(g=>[g.name,...ML.map(([m])=>{const e=ent(`m:${d}:${m}`,g.id);return e&&e.on?e.n:0})]);
+  mk(dn.replace(' February',' Feb')+' Food',['Family Name',...ML.map(x=>x[1])],r,['TOTAL MEMBERS',...ML.map(([m])=>tot(`m:${d}:${m}`)[1])])});
+ const rows=[['EVENTS','',''],...EV.map(([i,n])=>{const t=tot('e:'+i);return[n,t[0],t[1]]})];
+ DAYS.forEach(([d,dn])=>{rows.push(['','',''],['FOOD – '+dn.toUpperCase(),'','']);ML.forEach(([m,mn])=>{const t=tot(`m:${d}:${m}`);rows.push([mn,t[0],t[1]])})});
+ rows.push(['','',''],['OVERALL','','']);rows.push(['Total families in master list',M.length,''],['Total people in master list','',M.reduce((s,g)=>s+g.members,0)]);
+ const ws=mk('Summary',['Item','Families','Members'],rows);ws.eachRow(r=>{const v=String(r.getCell(1).value||'');if(v&&v==v.toUpperCase())r.font={bold:true}});
+ const b=new Blob([await wb.xlsx.writeBuffer()],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),a=document.createElement('a');
+ a.href=URL.createObjectURL(b);a.download='Wedding_Guest_Food_List.xlsx';a.click();toast('Excel file downloaded')}
+function act(a,el){const k=key(),id=el.dataset.id,g=id&&gOf(id);const step=n=>{if(k=='g'){snap();g.members=Math.max(1,n);save()}else put(k,id,{n:Math.max(0,n)});body()};
+ const cur=()=>k=='g'?g.members:(ent(k,id)||{n:g.members}).n;
+ ({menu:()=>$('#side').classList.toggle('open'),
+ tog:()=>{put(k,id,{on:el.checked});body()},inc:()=>step(cur()+1),dec:()=>step(cur()-1),num:()=>step(Math.floor(+el.value)||0),rm:()=>{put(k,id,{on:false});body();toast('Removed from this list (still in master list)',1)},
+ add:()=>guestModal(),edit:()=>guestModal(id),close:()=>$('#dlg').close(),saveg:saveG,
+ del:()=>{if(!confirm(`Delete "${g.name}" from the master list and ALL events and meals?`))return;snap();S.g=S.g.filter(x=>x.id!=id);Object.values(S.a).forEach(o=>delete o[id]);save();body();toast('Deleted',1)},
+ sort:()=>{ui.d*=-1;render()},filt:()=>{ui.f=el.value;body()},
+ all:()=>{snap();S.g.forEach(x=>{if(vis(k,x)){const o=S.a[k]=S.a[k]||{};(o[x.id]=o[x.id]||{on:false,n:x.members}).on=true}});save();body();toast('Everyone included',1)},
+ none:()=>{if(!confirm('Remove everyone from this list? The master list stays unchanged.'))return;snap();S.a[k]={};save();body();toast('List cleared',1)},
+ undo:()=>{if(!U.length)return toast('Nothing to undo');S=JSON.parse(U.pop());save();render();toast('Undone')},
+ imp:()=>$('#pdf').click(),pdf:()=>el.files[0]&&readPdf(el.files[0]),imc:()=>{IM[el.dataset.i].on=el.checked;IM[el.dataset.i].touched=1},imt:()=>{IM[el.dataset.i].t=el.value},imn:()=>{IM[el.dataset.i].n=Math.max(0,Math.floor(+el.value)||0)},doimp:doImport,
+ day:()=>{ui.day=el.dataset.d;render()},mealtab:()=>{ui.meal=el.dataset.m;render()},meal:()=>{ui.v='food';ui.day=el.dataset.d;ui.meal=el.dataset.m;ui.q='';render()},
+ export:exportXlsx})[a]?.()}
+document.addEventListener('click',e=>{const go=e.target.closest('[data-go]');if(go){ui.v=go.dataset.go=='guests'?'guests':go.dataset.go;ui.q='';ui.f='all';render();return}
+ const b=e.target.closest('[data-a]');if(b&&!['INPUT','SELECT'].includes(b.tagName))act(b.dataset.a,b)});
+document.addEventListener('change',e=>{const t=e.target;if(t.dataset.a&&['INPUT','SELECT'].includes(t.tagName))act(t.dataset.a,t)});
+document.addEventListener('input',e=>{if(e.target.id=='q'){ui.q=e.target.value;body()}else if(['imt','imn'].includes(e.target.dataset.a))act(e.target.dataset.a,e.target)});
+render();if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script></body></html>
